@@ -1,0 +1,32 @@
+app = "diamond-hub-bot"  # Change to your app name
+kill_signal = "SIGINT"
+kill_timeout = 5
+processes = []
+
+[build]
+  image = "node:18-bullseye"
+
+[env]
+  TOKEN = "" # Set Fly secret instead of hardcoding
+
+[experimental]
+  allowed_public_ports = []
+  auto_rollback = true
+
+[[services]]
+  internal_port = 8080
+  protocol = "tcp"
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+  [[services.tcp_checks]]
+    interval = 10000
+    timeout = 2000
+    grace_period = "1s"
+    restart_limit = 0
