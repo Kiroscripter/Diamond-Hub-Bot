@@ -172,6 +172,24 @@ client.on("messageCreate", async msg => {
     msg.reply({ embeds: [embed] });
   }
 
+  // GIVE GEO INFINITE (admin)
+  if(cmd === "givegeoinf" && msg.member.permissions.has("Administrator")){
+    const target = msg.mentions.users.first();
+    if(!target) return msg.reply("> ❌ You need to mention a user to give Geo!");
+
+    const amount = parseInt(args[1]);
+    if(isNaN(amount) || amount < 1) return msg.reply("> ❌ Please enter a valid amount!");
+
+    addGeo(target.id, amount);
+
+    const embed = new EmbedBuilder()
+      .setTitle("💸 Geo Given!")
+      .setDescription(`> **${target.tag}** received **${amount} ${settings.currency}** (infinite admin command)!`)
+      .setColor("Gold");
+
+    msg.reply({ embeds: [embed] });
+  }
+
   // SHOP
   if (cmd==="shop"){
     const prices = {
