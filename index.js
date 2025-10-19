@@ -149,6 +149,29 @@ client.on("messageCreate", async msg => {
     msg.reply({ embeds: [embed] });
   }
 
+  // ===== GIVE GEO =====
+  if(cmd === "givegeo"){
+    const target = msg.mentions.users.first();
+    if(!target) return msg.reply("> ❌ You need to mention a user to give Geo!");
+    if(target.id === msg.author.id) return msg.reply("> ❌ You cannot give Geo to yourself!");
+    if(target.bot) return msg.reply("> ❌ You cannot give Geo to bots!");
+
+    const amount = parseInt(args[1]);
+    if(isNaN(amount) || amount < 1) return msg.reply("> ❌ Please enter a valid amount to give!");
+    if(geo(msg.author.id) < amount) return msg.reply("> ❌ You don't have enough " + settings.currency + "!");
+
+    // Subtract from sender and add to receiver
+    addGeo(msg.author.id, -amount);
+    addGeo(target.id, amount);
+
+    const embed = new EmbedBuilder()
+      .setTitle("💸 Geo Sent!")
+      .setDescription(`> **${msg.author.tag}** gave **${amount} ${settings.currency}** to **${target.tag}**!`)
+      .setColor("Gold");
+
+    msg.reply({ embeds: [embed] });
+  }
+
   // SHOP
   if (cmd==="shop"){
     const prices = {
