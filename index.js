@@ -99,6 +99,65 @@ client.on("guildMemberAdd", async member => {
   } catch { console.log(`⚠️ Could not DM ${member.user.tag}`); }
 });
 
+// ===== MEMBER JOIN VERIFICATION SYSTEM =====
+client.on("guildMemberAdd", async (member) => {
+    const verifiedRoleId = "1363441855940923502"; // ✅ Verified role
+    const unverifiedRoleId = "1365352855006875779"; // 🚫 Unverified role
+    const backupChannelId = "1373228401585819729"; // 📩 Backup channel
+    const verifyEmoji = "✅";
+
+    const verifyMessage = `
+👋 **Welcome to ${member.guild.name}!**
+Please verify yourself to access the server.
+
+**How to Verify:**
+• On **PC** – Click the ${verifyEmoji} emoji below.
+• On **Mobile** – Tap and hold the message → React with ${verifyEmoji}.
+
+Once verified, you’ll gain access to all channels!
+    `;
+
+    try {
+        // Try to DM the user
+        const dm = await member.send(verifyMessage);
+        await dm.react(verifyEmoji);
+
+        const filter = (reaction, user) => reaction.emoji.name === "✅" && user.id === member.id;
+        const collector = dm.createReactionCollector({ filter, max: 1, time: 300000 }); // 5 min
+
+        collector.on("collect", async () => {
+            await member.roles.add(verifiedRoleId).catch(console.error);
+            await member.roles.remove(unverifiedRoleId).catch(console.error);
+            await member.send("✅ You’ve been verified! Welcome!");
+        });
+
+    } catch (err) {
+        // If DMs are closed, send in backup channel (visible only to user)
+        const channel = member.guild.channels.cache.get(backupChannelId);
+        if (!channel) return;
+
+        const message = await channel.send({
+            content: `${member}`,
+            embeds: [{
+                title: "👋 Verify Yourself!",
+                description: verifyMessage,
+                color: 0xFFD700
+            }]
+        });
+
+        await message.react(verifyEmoji);
+
+        const filter = (reaction, user) => reaction.emoji.name === "✅" && user.id === member.id;
+        const collector = message.createReactionCollector({ filter, max: 1, time: 300000 });
+
+        collector.on("collect", async () => {
+            await member.roles.add(verifiedRoleId).catch(console.error);
+            await member.roles.remove(unverifiedRoleId).catch(console.error);
+            await message.reply({ content: "✅ You’re verified!", ephemeral: true }).catch(() => {});
+        });
+    }
+});
+
 // ===== AUTO MOD & CHAT REWARDS =====
 client.on("messageCreate", msg => {
   if (msg.author.bot) return;
