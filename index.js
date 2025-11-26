@@ -4,7 +4,7 @@ import express from "express";
 import fs from "fs";
 
 // ===== CONFIG =====
-const TOKEN = process.env.TOKEN; // Get token from Replit Secrets
+const TOKEN = process.env.TOKEN; // Get token from Replit Secrets fr
 const DATA_FILE = "./balances.json";
 const SETTINGS_FILE = "./settings.json";
 const WARNINGS_FILE = "./warnings.json";
